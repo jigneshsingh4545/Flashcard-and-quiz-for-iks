@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IKS Flashcards</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Source+Serif+4:wght@400;600&display=swap">
+<style>
+:root{--bg:#0A0B1E;--surf:#14163A;--ink:#F3F4FF;--mut:#A3A8E0;--line:#2E3280;--acc:#FFB300;--front:#3B1D8F;--fink:#fff;--ok:#2DFFB3;--bad:#FF5C8A;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+:root[data-theme="light"]{--bg:#EEF1F7;--surf:#fff;--ink:#1B2150;--mut:#5A6290;--line:#CBD1E6;--acc:#E8A317;--ok:#17806D;--bad:#B3392F;color-scheme:light}
+
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.5 "Source Serif 4",Georgia,serif}body::before{content:"";position:fixed;inset:-20%;z-index:-1;background:radial-gradient(40% 40% at 20% 20%,#ff2e9a55,transparent),radial-gradient(35% 35% at 80% 30%,#00e5ff44,transparent),radial-gradient(40% 40% at 50% 90%,#ffb30044,transparent);animation:drift 18s ease-in-out infinite alternate}@keyframes drift{to{transform:translate(4%,3%) rotate(8deg) scale(1.1)}}
+.wrap{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1{font:700 34px/1.1 "Bricolage Grotesque",system-ui,sans-serif;margin:0;background:linear-gradient(90deg,#FFB300,#FF2E9A,#00E5FF);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px #ff2e9a88)}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.sub{color:var(--mut);margin:4px 0 16px;font-size:15px}
+button{font:500 15px "Bricolage Grotesque",system-ui,sans-serif;color:var(--ink);cursor:pointer}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip,.tab,.btn{border:1.5px solid var(--line);background:var(--surf);border-radius:999px;padding:7px 14px}
+.chip[aria-pressed=true],.tab[aria-pressed=true]{background:linear-gradient(90deg,#7B2FF7,#FF2E9A);border-color:transparent;color:#fff;box-shadow:0 0 18px #ff2e9a88}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.tab{border-radius:10px;padding:10px 4px}
+.btn{border-radius:10px;padding:12px 18px;flex:1;min-width:110px}
+.btn.pri{background:linear-gradient(90deg,#FFB300,#FF6B35);border-color:transparent;color:#1B1030;font-weight:700;box-shadow:0 0 22px #ffb30077}
+.btn.good{border-color:var(--ok);color:var(--ok)}
+.btn.bad{border-color:var(--bad);color:var(--bad)}
+.meta{display:flex;justify-content:space-between;color:var(--mut);font-size:14px;margin:6px 0}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.bar i{display:block;height:100%;background:var(--ok);transition:width .3s}
+.card{display:block;width:100%;height:360px;perspective:1000px;border:0;background:none;padding:0;text-align:left}
+.in{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.card.flip .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;padding:22px;display:flex;flex-direction:column;justify-content:center;overflow:auto}
+.front{background:linear-gradient(135deg,#3B1D8F,#B5179E 60%,#FF6B35);color:#fff;box-shadow:0 0 36px #ff2e9a77}
+.back{background:var(--surf);border:2px solid var(--acc);box-shadow:0 0 28px #ffb30066;transform:rotateY(180deg);color:var(--ink)}
+.tag{position:absolute;top:12px;left:22px;font:500 13px "Bricolage Grotesque",sans-serif;opacity:.75}
+.q{font:700 25px/1.25 "Bricolage Grotesque",system-ui,sans-serif}
+.a{font-size:21px;line-height:1.45}
+.hint{position:absolute;bottom:12px;left:22px;font-size:13px;opacity:.7}
+.opts{display:grid;gap:10px;margin-top:14px}
+.opt{text-align:left;border:2px solid var(--line);background:var(--surf);border-radius:12px;padding:14px 16px;font:400 17px/1.4 "Source Serif 4",Georgia,serif}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,var(--surf))}
+.opt.no{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 16%,var(--surf))}
+.qbox{background:linear-gradient(135deg,#3B1D8F,#B5179E);color:#fff;box-shadow:0 0 30px #b5179e66;border-radius:16px;padding:22px;font:700 23px/1.25 "Bricolage Grotesque",system-ui,sans-serif}
+.stat{display:flex;gap:18px;font:500 15px "Bricolage Grotesque",sans-serif}
+.stat b{font-size:22px}
+.big{font:700 56px/1 "Bricolage Grotesque",sans-serif;margin:8px 0}
+.panel{background:var(--surf);border:1.5px solid var(--line);border-radius:16px;padding:20px}
+.link{border:0;background:none;color:var(--mut);text-decoration:underline;padding:6px}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;border:0;border-radius:999px;padding:14px 20px;background:linear-gradient(90deg,#FF2E9A,#FFB300);color:#1B1030;font-weight:700;box-shadow:0 0 26px #ff2e9a99}
+.chat{position:fixed;inset:auto 12px calc(12px + env(safe-area-inset-bottom,0px)) 12px;max-width:520px;margin-left:auto;height:min(70vh,560px);z-index:30;background:var(--surf);border:1.5px solid var(--acc);border-radius:18px;display:flex;flex-direction:column;box-shadow:0 0 40px #00e5ff55}
+.chat[hidden],.fab[hidden]{display:none}
+.ch{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font:700 16px "Bricolage Grotesque",sans-serif}
+.cm{flex:1;overflow:auto;padding:0 16px;display:flex;flex-direction:column;gap:10px}
+.m{padding:10px 14px;border-radius:14px;max-width:88%;font-size:16px;white-space:pre-wrap}
+.m.u{align-self:flex-end;background:var(--acc);color:#1B1030}
+.m.b{background:#ffffff14;border:1px solid var(--line)}
+.cf{display:flex;gap:8px;padding:12px}
+.cf input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg);color:var(--ink);font:400 16px "Source Serif 4",serif}
+.why{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:16px;line-height:1.45;color:var(--mut)}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;border:0;border-radius:999px;padding:14px 20px;background:linear-gradient(90deg,#FF2E9A,#FFB300);color:#1B1030;font-weight:700;box-shadow:0 0 26px #ff2e9a99}
+.chat{position:fixed;inset:auto 12px calc(12px + env(safe-area-inset-bottom,0px)) 12px;max-width:520px;margin-left:auto;height:min(70vh,560px);z-index:30;background:var(--surf);border:1.5px solid var(--acc);border-radius:18px;display:flex;flex-direction:column;box-shadow:0 0 40px #00e5ff55}
+.chat[hidden],.fab[hidden]{display:none}
+.ch{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font:700 16px "Bricolage Grotesque",sans-serif}
+.cm{flex:1;overflow:auto;padding:0 16px;display:flex;flex-direction:column;gap:10px}
+.m{padding:10px 14px;border-radius:14px;max-width:88%;font-size:16px;white-space:pre-wrap}
+.m.u{align-self:flex-end;background:var(--acc);color:#1B1030}
+.m.b{background:#ffffff14;border:1px solid var(--line)}
+.cf{display:flex;gap:8px;padding:12px}
+.cf input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg);color:var(--ink);font:400 16px "Source Serif 4",serif}
+.pt{position:fixed;left:50%;top:55%;width:9px;height:9px;border-radius:50%;pointer-events:none;z-index:40;animation:pt .9s ease-out forwards}@keyframes pt{to{transform:translate(var(--x),var(--y));opacity:0}}
+@media (prefers-reduced-motion:reduce){.in,.bar i{transition:none}body::before{animation:none}.pt{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><h1>IKS Flashcards</h1><p class="sub" id="sub"></p></div>
+    <button class="chip" id="th" onclick="theme()" aria-label="Switch light or dark theme">Theme</button>
+  </div>
+  <div class="row" id="chips"></div>
+  <div class="tabs" id="tabs"></div>
+  <main id="app" aria-live="polite"></main>
+<button class="fab" id="fab" onclick="chat(true)" hidden>Ask the guru</button>
+<section class="chat" id="chat" hidden aria-label="AI tutor chat"><div class="ch"><span>Guru chat</span><button class="link" onclick="chat(false)">Close</button></div><div class="cm" id="cm"><div class="m b">Ask me anything about IKS, or tap Explain this for the card you are on. I’ll explain in simple words.</div></div><div class="row" style="padding:0 12px"><button class="chip" onclick="ask('Explain the reasoning behind this in simple words.')">Explain this</button><button class="chip" onclick="ask('Give me a memory trick for this.')">Memory trick</button></div><form class="cf" onsubmit="return send(event)"><input id="ci" placeholder="Ask anything about IKS" aria-label="Your question"><button class="btn pri" style="flex:none;min-width:0">Send</button></form></section>
+</div>
+<script>
+const UN={1:"Foundations",2:"Math & Science",3:"Language",4:"Ayurveda",5:"Ethics"};
+const D=`1|What does IKS stand for?|Indian Knowledge Systems: traditional sciences, arts, philosophies and practices of the Indian subcontinent.|The term groups ancient sciences, arts, philosophy and culture into one holistic body of knowledge, so it is defined by its wide scope.
+1|Dharma|Moral and ethical duty. It varies with a person’s role and stage of life.|Dharma is duty tied to one’s role, so a student, a parent and a ruler each have different dharma.
+1|Karma|The law of cause and effect: every action has consequences for one’s future.|Karma links action to result, like cause and effect in code: what you do now shapes the output later.
+1|Moksha|Liberation from samsara, the cycle of birth and rebirth.|Moksha is the final goal because it ends the repeating cycle of rebirth and suffering.
+1|Samsara|The cycle of birth, death and rebirth.|Samsara means continuous flow, a loop of birth, death and rebirth that moksha finally exits.
+1|Brahman and Atman (Vedanta)|Brahman is the ultimate reality; Atman is the individual soul.|Vedanta teaches that the individual self (Atman) is not separate from the ultimate reality (Brahman).
+1|Samkhya school|A dualist view: reality is Purusha (consciousness) and Prakriti (matter).|Samkhya explains everything as two principles: conscious spirit (Purusha) and material nature (Prakriti).
+1|Yoga school|The path to liberation through meditation and ethical conduct.|Yoga is a practical method: discipline of body, mind and conduct leads to liberation.
+1|Nyaya school|Logic and epistemology: gaining knowledge through systematic reasoning.|Nyaya trains correct reasoning, like a detective, so it is the school of logic and proof.
+1|Vaisheshika school|Metaphysics of reality; the universe is made of atoms.|Vaisheshika studies categories of the physical world and holds that matter is built from atoms.
+1|Mimamsa school|Interpretation of the Vedas, especially ritual practice and dharma.|Mimamsa asks how the Vedic texts should be understood, so it deals with interpretation, ritual and duty.
+1|Name the six darshanas|Nyaya, Vaisheshika, Samkhya, Yoga, Mimamsa, Vedanta.|These six schools are the classical orthodox darshanas, each giving a different view of reality, knowledge and ethics.
+1|Buddhism and Jainism|Reform movements that challenged Vedic orthodoxy and stressed ethical living and non-violence.|They arose as reform movements that questioned rigid ritual orthodoxy and stressed ethics and non-violence.
+1|Maya (Advaita Vedanta)|The illusion that hides the true nature of reality.|Maya is why the world can appear real while the deeper reality (Brahman) stays hidden.
+1|Vairagya|Detachment: inner calm and freedom from desires.|Vairagya is calm freedom from craving, which Yoga and the Gita treat as necessary for inner peace.
+2|Aryabhatiya|Aryabhata’s concise text (c. 499 CE) of 121 verses on mathematics and astronomy.|The text is short and compact: 121 verses that pack mathematics and astronomy together.
+2|Four sections of the Aryabhatiya|Gitikapada, Ganitapada, Kalakriyapada, Golapada.|Its four parts divide the work into cosmology, mathematics, calendar calculations and spherical astronomy.
+2|Aryabhata’s value of pi|3.1416.|It is a close approximation of pi, accurate to four decimal places, and was remarkable for its time.
+2|Aryabhata on the Earth|The Earth rotates on its axis, which explains the apparent motion of the stars.|A spinning Earth explains why stars seem to move across the sky each night, without the stars themselves moving.
+2|Aryabhata on eclipses|They are caused by the shadows of the Earth and Moon, not by demons.|He used geometry and shadows, so eclipses became a natural event that can be predicted instead of a myth.
+2|Jya and kojya|The Sanskrit names for sine and cosine.|Jya (sine) and kojya (cosine) are the origin of the terms used in trigonometry; Arabic transmission later shaped the word “sine”.
+2|Brahmasphutasiddhanta|Brahmagupta’s major work, written in 628 CE.|The name means “the opening of the universe”, and the work dates to 628 CE.
+2|Brahmagupta and zero|He gave the first explicit rules for arithmetic with zero as a number.|Treating zero as a number with rules for adding, subtracting and multiplying made modern arithmetic and algebra possible.
+2|Brahmagupta’s formula|Area of a cyclic quadrilateral = √((s−a)(s−b)(s−c)(s−d)), s = semi-perimeter.|It generalises the triangle area idea to four-sided figures inscribed in a circle, using the semi-perimeter s.
+2|Sulbasutras|Texts from about 800 BCE on altar geometry, including a statement of the Pythagorean theorem.|These are the oldest extant geometry texts, written to build ritual altars exactly, so they contain early geometric rules.
+2|Iron Pillar of Delhi|A roughly 7 m iron pillar (c. 4th century CE) that has resisted rust for over 1600 years.|Its rust resistance shows advanced iron-working skill, which is why it is studied in metallurgy.
+2|Wootz steel|High-quality steel made in ancient India and exported across the world.|Its high quality and strength made it valuable for swords and tools, so it became a famous export.
+2|Pingala’s Chandahshastra|A 3rd century BCE text on prosody that laid foundations for combinatorics.|Prosody (the study of verse rhythm) needs counting patterns, so Pingala’s work led to combinatorics.
+2|Kerala School (Madhava)|Discovered infinite series for pi and trigonometric functions (c. 1340–1420).|Madhava’s school found infinite series, a key idea that later became central to calculus.
+2|The number 205|Zero is a placeholder showing there are no tens.|In 205 the zero holds the tens place, which proves how place value depends on zero.
+2|Aryabhata satellite|India’s first satellite, launched in 1975 and named in his honour.|Naming the first satellite after him honours his lasting role in Indian astronomy and mathematics.
+2|Srinivasa Ramanujan|Known for number theory, elliptic functions, continued fractions and infinite series.|Ramanujan is celebrated for deep results in pure mathematics, mainly number theory and series.
+3|Panini|Ancient grammarian (c. 500 BCE) who wrote the Ashtadhyayi.|Panini systematised Sanskrit so thoroughly that he is called the father of linguistics.
+3|Ashtadhyayi|Panini’s grammar of Sanskrit with nearly 4,000 sutras (rules).|Its roughly 4,000 sutras are compact rules that generate correct Sanskrit forms.
+3|Why is Panini’s grammar linked to NLP?|Its precise, rule-based, unambiguous structure works like an algorithm.|Both are rule systems that produce correct output from structured inputs, so Panini’s approach resembles an algorithm.
+3|What is NLP?|Natural Language Processing: helping computers understand and respond to human language.|NLP is the field that lets computers read, understand and generate human language.
+3|Official Indian languages|22 languages are listed in the Eighth Schedule of the Constitution.|The Eighth Schedule of the Constitution lists the officially recognised languages, and there are 22.
+3|Indo-Aryan languages|Hindi, Bengali, Marathi, Gujarati, Punjabi and others.|They form the largest family in India and share a common Indo-European ancestry.
+3|Dravidian languages|Tamil, Telugu, Kannada and Malayalam.|These four southern languages belong to the Dravidian family, which is separate from Indo-Aryan.
+3|Typical word order in Indian languages|Subject-Object-Verb (SOV), unlike English SVO.|Most Indian languages put the verb at the end of a sentence, for example “I book read”.
+3|Morpheme|The smallest unit of meaning in a language.|A morpheme is the smallest meaningful piece; words are built from them.
+3|Agglutination|Building words by joining morphemes in a line, each with one grammatical function.|Each added piece keeps one clear meaning, so the word is a clean chain of parts, like Tamil and Turkish words.
+3|Linguistic typology|Classifying languages by structural features such as sounds, word order and grammar.|Typology compares structures such as word order, so it helps NLP tools adapt to each language.
+3|Linguistic relativity|The idea that a language’s words and grammar influence how its speakers think.|This idea says the language you speak can shape how you think about time, space and relationships.
+4|Meaning of Ayurveda|“Science of life”: Ayur (life) + Veda (knowledge).|The word joins ayur (life) and veda (knowledge), so it literally means the science of life.
+4|The three doshas|Vata, Pitta and Kapha.|Ayurveda explains health through three governing energies, called doshas.
+4|Vata|Air and space; governs movement, creativity and communication.|Vata is linked with air and space, which is why it is tied to motion and communication.
+4|Pitta|Fire and water; governs digestion, metabolism and energy.|Pitta is linked with fire, so it is the dosha of digestion and metabolism.
+4|Kapha|Earth and water; governs structure, stability and fluid balance.|Kapha is linked with earth and water, which gives it the role of structure and stability.
+4|Prakriti|A person’s unique constitution, set by dominant dosha(s).|Prakriti is your natural balance of doshas, so treatment is personalised for each person.
+4|Agni|The digestive fire, central to digestion and health.|Agni is the fire that digests food, and Ayurveda treats it as the base of good health.
+4|Ojas|The essence of vitality and immunity.|Ojas is the refined result of good digestion and lifestyle, so it represents strength and immunity.
+4|Panchakarma|A detox series of treatments that aims to remove toxins (Ama).|Panchakarma is a cleansing programme meant to remove accumulated toxins (Ama).
+4|Dinacharya|The recommended daily routine, such as oil massage and tongue scraping.|Dinacharya is a set routine, such as oil massage and tongue scraping, that keeps doshas balanced daily.
+4|Nadi Pariksha|Pulse diagnosis used to assess dosha balance.|The practitioner reads the pulse, so Nadi Pariksha is a diagnosis method based on touch.
+4|Dhanvantari|The Hindu god of Ayurveda, an avatar of Vishnu.|Dhanvantari is the divine physician in Hindu tradition, so he is linked with Ayurveda.
+4|Ashwagandha|An adaptogen traditionally used to help the body cope with stress.|Ashwagandha is called an adaptogen because it is traditionally used to help the body handle stress.
+5|Ahimsa|Non-violence in thought, word and deed; in AI, avoiding harm to people.|Ahimsa means avoiding harm in thought, word and action, which also guides AI that must not harm users.
+5|Satya|Truthfulness; in AI, transparency and honest, non-misleading systems.|Satya is truthfulness, so it supports honest and transparent AI and data practices.
+5|Dharma in AI ethics|Responsible development: acting justly in one’s role and avoiding harm to society.|Dharma means acting rightly in your role, so developers should build AI responsibly.
+5|Vidya|Knowledge, seen as sacred; teachers (Gurus) are highly respected.|Indian tradition treats learning as sacred, which is why teachers are respected.
+5|Loka-Sangraha|Acting for the welfare of society as a whole.|Loka-Sangraha means working for everyone’s welfare, so technology should benefit society as a whole.
+5|Sarva Dharma Samabhava|Equal respect for all beliefs, inspiring inclusive technology.|It promotes equal respect for every belief, which supports inclusive and fair technology.
+5|Which values support informed consent?|Satya (truth) and Ahimsa (non-harm).|Consent is about honest information (Satya) and avoiding harm to people (Ahimsa).
+5|Bias in AI and which principle?|Satya: algorithms should be transparent and fair.|Fair and transparent algorithms follow Satya, because hidden bias is a kind of untruth.
+1|Which school builds on the Upanishads?|Vedanta.|Vedanta draws on the Upanishads, which discuss Brahman and Atman.
+1|Which school says the universe is made of atoms?|Vaisheshika.|Vaisheshika is the atomist school, so it explains the physical world through atoms.
+1|Which school splits reality into Purusha and Prakriti?|Samkhya.|Samkhya is the dualist school whose two principles are Purusha and Prakriti.
+1|Which school focuses on logic and reasoning?|Nyaya.|Nyaya is the school of logic, which teaches valid reasoning and knowledge.
+1|Which period do the Vedas belong to?|The Vedic period, about 1500–500 BCE.|The Vedic period is the early era in which the Vedas were composed.
+1|Name the two great Indian epics|The Mahabharata and the Ramayana.|These two epics are the foundational narrative works of Indian literature.
+1|Ancient Indian universities|Nalanda and Takshashila.|These centres taught students from many fields and were famous ancient universities.
+1|Gurukula|A traditional school where students learn while living with a guru.|In a gurukula the teacher and students lived together, so learning included values as well as skills.
+1|Natya Shastra|An ancient text on the theory of drama, music and dance.|The Natya Shastra is the classic work on the art of performance, covering drama, music and dance.
+1|Vastu Shastra|The traditional science of architecture.|Vastu Shastra covers the principles of building design and space.
+1|Jyotisha|Traditional astronomy, the science of celestial bodies and time.|Jyotisha studies the movements of celestial bodies, so it is the traditional science of astronomy.
+1|Religions that originated in India|Hinduism, Buddhism, Jainism and Sikhism.|Four major religions began in India: Hinduism, Buddhism, Jainism and Sikhism.
+2|Who wrote the Brahmasphutasiddhanta?|Brahmagupta, in 628 CE.|Brahmagupta wrote it in 628 CE, and it contains his rules for zero and his astronomy.
+2|What is n × 0?|Zero, one of Brahmagupta’s rules for arithmetic with zero.|Multiplying any number by zero gives zero, one of Brahmagupta’s basic zero rules.
+2|Brahmagupta on division by zero|He attempted a definition, but it remained problematic.|Division by zero has no meaningful value, which is why it is still treated as undefined.
+2|Which number system did Indian mathematicians use?|The decimal place-value system, with zero as a placeholder and a number.|Place value with zero lets ten digits write any number, which is the system used worldwide today.
+2|Baudhayana|Author of a Sulbasutra (c. 800 BCE) with rules for altar construction.|Baudhayana’s rules for building altars include early geometric statements such as the Pythagorean relation.
+2|Bhavana law|Brahmagupta’s composition law for solving quadratic indeterminate equations.|The bhavana law is a clever way to combine solutions of quadratic indeterminate equations.
+2|Satyendra Nath Bose|Physicist whose work sent to Einstein led to Bose–Einstein statistics.|Bose’s work on counting particles became Bose–Einstein statistics after Einstein supported it.
+2|Shakuntala Devi|Known as the “Human Computer” for her mental calculation.|She earned the nickname because she could do huge calculations in her head without a calculator.
+2|Interpolation|Estimating a value between known data points; Brahmagupta used it for celestial positions.|Interpolation fills in gaps between known values, which let astronomers estimate positions at times between observations.
+2|Sidereal period|The time a planet takes to orbit once relative to the stars.|A sidereal period is measured against the fixed stars instead of the Sun, so it gives a planet’s true orbital time.
+2|Aryabhata’s sine table|It allowed precise calculation of planetary positions and eclipses.|A sine table lets you look up values quickly, which is how astronomers calculated positions and eclipses.
+2|Surds|Irrational roots; the Sulbasutras gave neat approximations to them.|A surd is an irrational root like the square root of 2, and the Sulbasutras give good approximations of such numbers.
+3|Which script writes Hindi and Sanskrit?|Devanagari.|Hindi and Sanskrit are both written in the Devanagari script.
+3|Hindi: “I book read” shows which order?|SOV: Subject, Object, Verb.|The verb comes last (Subject, Object, Verb), which is the usual pattern in Indian languages.
+3|Free vs bound morpheme|A free morpheme stands alone (book); a bound one attaches (un-, -ing).|A free morpheme is a word on its own, while a bound morpheme such as un- or -ing needs a host word.
+3|Agglutination vs inflection|Agglutination keeps each morpheme distinct; inflection fuses several features into one form.|In agglutination each affix stays separate and clear, while in inflection one ending can hold several meanings at once.
+3|Which family does Tamil belong to?|Dravidian.|Tamil, Telugu, Kannada and Malayalam form the Dravidian family, and Tamil is one of its oldest members.
+3|Austroasiatic languages in India|Santali and Khasi.|Santali and Khasi belong to the Austroasiatic family, which is spoken by tribal communities in eastern India.
+3|Sino-Tibetan languages in India|Manipuri and Bodo.|Manipuri and Bodo are Sino-Tibetan languages used in northeast India.
+3|Mother tongues reported in India|Over 19,500.|Counting every community language gives over 19,500, which shows how diverse India is.
+3|Why study Sanskrit for NLP?|Its precise grammar defines forms and relations clearly, reducing ambiguity.|Because Sanskrit grammar is precise, it gives researchers a clear model of rules that reduce ambiguity.
+3|Everyday NLP examples|Voice assistants, translation apps, spell checkers and chatbots.|These tools all need software to understand and respond to human language.
+3|Challenge for Indian language technology|Limited digital data and complex scripts.|Many Indian languages have little digital text and speech data, and their scripts are complex to process.
+3|Neural network language models|Deep learning systems, such as GPT-style models, that learn language patterns from data.|Neural networks learn patterns from large amounts of text, which is how they can generate human-like language.
+4|Which dosha governs movement?|Vata.|Vata is the dosha of air and space, which is why it is tied to movement.
+4|Which dosha governs digestion and metabolism?|Pitta.|Pitta is fire and water, and it controls digestion and metabolism.
+4|Which dosha governs structure and stability?|Kapha.|Kapha is earth and water, so it supports structure and stability.
+4|Ama|Toxins believed to cause disease.|Ama is the sticky waste that Ayurveda blames for disease, and Panchakarma aims to remove it.
+4|Abhyanga|Oil massage, part of the daily routine.|Abhyanga is a warm oil massage that Ayurveda recommends as part of a daily routine.
+4|Tulsi|Holy basil, known for immune-boosting and stress-reducing properties.|Tulsi is valued in Ayurveda for supporting immunity and reducing stress.
+4|Turmeric|An anti-inflammatory, antioxidant spice used in food and medicine.|Turmeric contains curcumin, and it is widely used for its anti-inflammatory and antioxidant effects.
+4|Triphala|An Ayurvedic herbal blend now sold as a dietary supplement.|Triphala is a traditional blend of fruits that is now sold as a wellness supplement.
+4|How does Ayurveda define health?|Balanced doshas, strong digestion and a peaceful mind.|Health is balance, and disease appears when diet, lifestyle or environment upset that balance.
+4|Prakriti analysis|Finding a dosha constitution from physical, emotional and behavioural traits.|The practitioner studies body, mood and behaviour to identify a person’s natural dosha type.
+4|Integrative medicine|Combining conventional treatment with Ayurvedic therapies.|Integrative medicine joins modern treatment with Ayurvedic therapies for more personal care.
+5|Satya in data|Transparency and integrity in how data and AI are used.|Satya applies to data because honest records and open systems build trust.
+5|Ahimsa in modern ethics|Environmental ethics, animal rights and harm-free AI.|Ahimsa extends to nature, animals and technology that should not cause harm.
+5|Data privacy and Ahimsa|Preventing harm from unauthorized data collection and misuse.|Harmful data collection or misuse hurts people, so Ahimsa supports strong privacy.
+5|Dharma and data security|Collected data should be stored and secured responsibly.|Dharma is responsibility, so those who collect data must store and protect it safely.
+5|Technology governance and Loka-Sangraha|Regulation that protects society’s welfare, not only profit.|Loka-Sangraha says rules for technology should protect everyone, not just company profit.
+5|Self-regulation by tech companies|Companies move fast but need ethical guidelines inspired by Ahimsa and Dharma.|Companies innovate quickly, but ethical principles such as Ahimsa and Dharma should guide them.
+5|Autonomy and control in AI|Dharma: keep human responsibility so AI serves humanity.|Dharma places responsibility on people, so AI should serve humanity and not take over decisions.
+5|Why is education moral in Indian tradition?|It builds ethics and understanding of one’s role, not only skills.|Education shapes character and a sense of duty as well as skills, so it is seen as a moral pursuit.`.split("\n").map((l,i)=>{const [u,q,a,r]=l.split("|");return{id:i,u:+u,q,a,r}});
+
+let unit=0,mode="study",shuf=false,hide=false,deck=[],idx=0,flip=false,known=new Set(),best={timed:0,streak:0},Q=null,timer=null;
+const $=s=>document.querySelector(s);
+const sh=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+try{const s=JSON.parse(localStorage.getItem("iksfc")||"{}");known=new Set(s.known||[]);best=s.best||best}catch(e){}
+function save(){try{localStorage.setItem("iksfc",JSON.stringify({known:[...known],best}))}catch(e){}}
+function theme(){const r=document.documentElement;r.dataset.theme=r.dataset.theme==="light"?"dark":"light"}
+function inUnit(){return D.filter(c=>!unit||c.u===unit)}
+function build(){let d=inUnit().filter(c=>!hide||!known.has(c.id));deck=shuf?sh(d):d;idx=0;flip=false}
+function setUnit(u){unit=u;stop();Q=null;build();render()}
+function setMode(m){mode=m;stop();Q=null;render()}
+function stop(){clearInterval(timer)}
+let SM=null,busy=false,hist=[];
+function host(){SM=async(p,o)=>{const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:p})});if(!r.ok)throw new Error("x");const j=await r.json();o.onText({text:j.text});return{text:j.text}};$("#fab").hidden=false;render()}
+try{if(window.claude)claude.use("sample").then(s=>{SM=s;if(s){$("#fab").hidden=false;render()}}).catch(()=>{});else if(location.protocol.startsWith("http"))host()}catch(e){}
+function chat(o){$("#chat").hidden=!o;$("#fab").hidden=o||!SM;if(o)$("#ci").focus()}
+function add(c,t){const d=document.createElement("div");d.className="m "+c;d.textContent=t;$("#cm").appendChild(d);$("#cm").scrollTop=1e9;return d}
+function cur(){if(mode==="study"&&deck.length){const c=deck[idx];return "Flashcard: "+c.q+" = "+c.a+". Reason: "+c.r}if(Q&&Q.c)return "Quiz question: "+Q.c.q+". Correct answer: "+Q.c.a+". Reason: "+Q.c.r+(Q.sel!==null?". Student chose: "+Q.opts[Q.sel]:"");return ""}
+function send(e){e.preventDefault();const i=$("#ci"),t=i.value.trim();if(t){ask(t);i.value=""}return false}
+function ask(t){if(!SM||busy)return;chat(true);add("u",t);const b=add("b","Thinking\u2026");busy=true;
+SM(`You are a friendly tutor for an Indian Knowledge Systems course for BCA/BSc IT students. Answer in 3 to 5 plain sentences, explain the reasoning, and add one simple analogy (IT analogies welcome). Be historically accurate: where a popular claim is disputed (for example Aryabhata proposing heliocentrism or elliptical orbits), say so briefly.\nCurrent study item: ${cur()||"none"}\nEarlier chat:\n${hist.slice(-6).join("\n")}\nStudent: ${t}`,{onText:({text})=>{b.textContent=text;$("#cm").scrollTop=1e9},cache:false}).then(r=>{hist.push("Student: "+t,"Tutor: "+r.text)}).catch(e=>{b.textContent=e&&e.code==="not_granted"?"Tutor chat is switched off for this page.":"The tutor couldn\u2019t answer just now. Try again in a moment."}).finally(()=>{busy=false})}
+function burst(){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;for(let i=0;i<14;i++){const s=document.createElement("i");s.className="pt";s.style.cssText=`--x:${(Math.random()-.5)*300}px;--y:${-80-Math.random()*220}px;background:hsl(${Math.random()*360} 100% 60%)`;document.body.appendChild(s);setTimeout(()=>s.remove(),900)}}
+function tog(k){if(k==="s")shuf=!shuf;else hide=!hide;build();render()}
+function resetP(){if(confirm("Clear all “Got it” progress?")){known.clear();save();build();render()}}
+function flipC(){flip=!flip;$(".card").classList.toggle("flip",flip)}
+function go(n){if(!deck.length)return;idx=(idx+n+deck.length)%deck.length;flip=false;render()}
+function mark(k){const c=deck[idx];k?known.add(c.id):known.delete(c.id);save();go(1)}
+
+function startQ(timed){
+  let pool=sh(inUnit());if(pool.length<4)pool=sh(D);
+  Q={timed,pool,i:0,score:0,streak:0,maxS:0,done:0,left:60,sel:null,total:timed?1e9:Math.min(10,pool.length),end:false};
+  mkOpts();if(timed){timer=setInterval(tick,1000)}render()
+}
+function mkOpts(){
+  const c=Q.pool[Q.i%Q.pool.length],same=sh(D.filter(x=>x.u===c.u&&x.id!==c.id&&x.a!==c.a)),rest=sh(D.filter(x=>x.u!==c.u&&x.a!==c.a));
+  Q.c=c;Q.opts=sh([c.a,...same.concat(rest).slice(0,3).map(x=>x.a)]);Q.sel=null
+}
+function tick(){Q.left--;const t=$("#tm");if(t)t.textContent=Q.left;if(Q.left<=0)finish()}
+function ans(k){
+  if(Q.sel!==null||Q.end)return;Q.sel=k;const ok=Q.opts[k]===Q.c.a;Q.done++;
+  if(ok){Q.score++;Q.streak++;Q.maxS=Math.max(Q.maxS,Q.streak);burst()}else Q.streak=0;
+  render();if(Q.timed)setTimeout(()=>{if(!Q.end)adv()},ok?1200:3000)
+}
+function adv(){Q.i++;if(!Q.timed&&Q.i>=Q.total)return finish();mkOpts();render()}
+function finish(){
+  stop();Q.end=true;
+  if(Q.timed)best.timed=Math.max(best.timed,Q.score);
+  best.streak=Math.max(best.streak,Q.maxS);save();render()
+}
+
+function render(){
+  const n=inUnit().length;
+  $("#sub").textContent=D.length+" cards across five units. Flip, quiz yourself, beat the clock.";
+  $("#chips").innerHTML=[0,1,2,3,4,5].map(u=>`<button class="chip" aria-pressed="${unit===u}" onclick="setUnit(${u})">${u?"Unit "+u+": "+UN[u]:"All units"}</button>`).join("");
+  $("#tabs").innerHTML=[["study","Study"],["quiz","Quiz"],["timed","60s Race"]].map(([m,l])=>`<button class="tab" aria-pressed="${mode===m}" onclick="setMode('${m}')">${l}</button>`).join("");
+  const a=$("#app");
+  if(mode==="study")a.innerHTML=study(n);else a.innerHTML=quiz(mode==="timed");
+}
+function study(n){
+  const kn=inUnit().filter(c=>known.has(c.id)).length;
+  let h=`<div class="meta"><span>${kn} of ${n} marked Got it</span><span>${deck.length?"Card "+(idx+1)+" of "+deck.length:""}</span></div><div class="bar"><i style="width:${n?kn/n*100:0}%"></i></div>`;
+  if(!deck.length)return h+`<div class="panel"><p>No cards to show. Every card here is marked Got it, or this filter is empty.</p><button class="btn pri" onclick="hide=false;build();render()">Show all cards</button></div>`+opts();
+  const c=deck[idx];
+  h+=`<button class="card ${flip?"flip":""}" onclick="flipC()" aria-label="Flip card. Press space to flip."><div class="in">
+  <div class="face front"><span class="tag">Unit ${c.u}: ${UN[c.u]}</span><div class="q">${c.q}</div><span class="hint">Tap to reveal</span></div>
+  <div class="face back"><span class="tag">${c.q}</span><div class="a">${c.a}</div><div class="why"><b>Why:</b> ${c.r}</div></div></div></button>
+  <div class="row"><button class="btn bad" onclick="mark(false)">Again</button><button class="btn good" onclick="mark(true)">Got it</button></div>
+  <div class="row"><button class="btn" onclick="go(-1)">Previous</button><button class="btn" onclick="go(1)">Next</button>${SM?`<button class="btn pri" onclick="ask('Explain the reasoning behind this card in simple words.')">Ask the guru</button>`:""}</div>`;
+  return h+opts()
+}
+function opts(){return `<div class="row"><button class="chip" aria-pressed="${shuf}" onclick="tog('s')">Shuffle</button><button class="chip" aria-pressed="${hide}" onclick="tog('h')">Hide cards I know</button><button class="link" onclick="resetP()">Reset progress</button></div>`}
+function quiz(timed){
+  if(!Q)return `<div class="panel"><h2 style="font:700 22px 'Bricolage Grotesque',sans-serif;margin:0 0 6px">${timed?"60-second race":"Practice quiz"}</h2><p>${timed?"Answer as many questions as you can before time runs out. Wrong answers just break your streak.":"10 multiple-choice questions from "+(unit?"Unit "+unit:"all units")+"."}</p><p class="sub">Best streak: ${best.streak}${timed?". Best race score: "+best.timed:""}</p><button class="btn pri" style="width:100%" onclick="startQ(${timed})">Start</button></div>`;
+  if(Q.end){const acc=Q.done?Math.round(Q.score/Q.done*100):0;
+    return `<div class="panel"><p class="sub" style="margin:0">${Q.timed?"Time’s up":"Quiz complete"}</p><div class="big">${Q.score}<span style="font-size:24px;color:var(--mut)"> correct</span></div><p>${Q.done} answered, ${acc}% accuracy, longest streak ${Q.maxS}.${Q.timed&&Q.score>=best.timed&&Q.score>0?" That’s your best race score.":""}</p><div class="row"><button class="btn pri" onclick="startQ(${Q.timed})">Play again</button><button class="btn" onclick="setMode('study')">Back to study</button></div></div>`}
+  const s=Q.sel;
+  return `<div class="meta stat"><span>Score <b>${Q.score}</b></span><span>Streak <b>${Q.streak}${Q.streak>2?" 🔥":""}</b></span>${Q.timed?`<span>Time <b id="tm">${Q.left}</b></span>`:`<span>Question <b>${Q.i+1}/${Q.total}</b></span>`}</div>
+  <div class="qbox">${Q.c.u===3||Q.c.q.endsWith("?")?Q.c.q:"What best describes: "+Q.c.q+"?"}</div>
+  <div class="opts">${Q.opts.map((o,k)=>`<button class="opt ${s!==null?(o===Q.c.a?"ok":k===s?"no":""):""}" onclick="ans(${k})" ${s!==null?"disabled":""}>${o}</button>`).join("")}</div>
+  ${s!==null?`<div class="panel why" style="margin-top:14px"><b>Answer:</b> ${Q.c.a}<br><b>Why:</b> ${Q.c.r}${SM?`<br><button class="btn" style="margin-top:10px;flex:none" onclick="ask('Explain this question in more detail with an analogy.')">Ask the guru</button>`:""}</div>`:""}
+  ${s!==null&&!Q.timed?`<div class="row"><button class="btn pri" onclick="adv()">${Q.i+1>=Q.total?"See results":"Next question"}</button></div>`:""}`
+}
+document.addEventListener("keydown",e=>{if(mode!=="study"||!deck.length)return;if(e.key===" "||e.key==="Enter"){if(e.target.tagName==="BUTTON"&&!e.target.classList.contains("card"))return;e.preventDefault();flipC()}else if(e.key==="ArrowRight")go(1);else if(e.key==="ArrowLeft")go(-1)});
+build();render();
+</script>
+</body>
+</html>
